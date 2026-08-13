@@ -12,8 +12,12 @@ import {
   Platform,
   ScrollView,
   Pressable,
+  Keyboard,
+  InputAccessoryView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const AMOUNT_INPUT_ACCESSORY = 'assetAmountInput';
 
 export default function AssetsScreen() {
   const [assets, setAssets] = useState([]);
@@ -180,6 +184,7 @@ export default function AssetsScreen() {
                 placeholder="Asset name (e.g., Savings Account)"
                 value={name}
                 onChangeText={setName}
+                returnKeyType="next"
               />
 
               <TextInput
@@ -188,27 +193,38 @@ export default function AssetsScreen() {
                 value={amount}
                 onChangeText={setAmount}
                 keyboardType="decimal-pad"
+                inputAccessoryViewID={AMOUNT_INPUT_ACCESSORY}
               />
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.cancelButton]}
-                  onPress={closeModal}
-                >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.confirmButton]}
-                  onPress={addAsset}
-                >
-                  <Text style={styles.confirmButtonText}>Add</Text>
-                </TouchableOpacity>
-              </View>
             </ScrollView>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={closeModal}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={addAsset}
+              >
+                <Text style={styles.confirmButtonText}>Add</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID={AMOUNT_INPUT_ACCESSORY}>
+          <View style={styles.keyboardToolbar}>
+            <TouchableOpacity onPress={Keyboard.dismiss}>
+              <Text style={styles.keyboardDoneText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      )}
     </View>
   );
 }
@@ -356,7 +372,7 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    marginTop: 20,
+    marginTop: 8,
   },
   modalButton: {
     flex: 1,
@@ -380,5 +396,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  keyboardToolbar: {
+    backgroundColor: '#f0f0f0',
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    alignItems: 'flex-end',
+  },
+  keyboardDoneText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#007AFF',
   },
 });
