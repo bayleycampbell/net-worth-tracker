@@ -8,7 +8,10 @@ import {
   TextInput,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
+  Pressable,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -44,6 +47,12 @@ export default function LiabilitiesScreen() {
     } catch (error) {
       Alert.alert('Error', 'Failed to save liabilities');
     }
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setName('');
+    setAmount('');
   };
 
   const addLiability = () => {
@@ -150,48 +159,55 @@ export default function LiabilitiesScreen() {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={closeModal}
       >
-        <View style={styles.modalContainer}>
+        <KeyboardAvoidingView
+          style={styles.modalContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <Pressable style={styles.modalBackdrop} onPress={closeModal} />
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add Liability</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Liability name (e.g., Mortgage)"
-              value={name}
-              onChangeText={setName}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Amount"
-              value={amount}
-              onChangeText={setAmount}
-              keyboardType="decimal-pad"
-            />
-
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setModalVisible(false);
-                  setName('');
-                  setAmount('');
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.confirmButton]}
-                onPress={addLiability}
-              >
-                <Text style={styles.confirmButtonText}>Add</Text>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add Liability</Text>
+              <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>Close</Text>
               </TouchableOpacity>
             </View>
+
+            <ScrollView keyboardShouldPersistTaps="handled">
+              <TextInput
+                style={styles.input}
+                placeholder="Liability name (e.g., Mortgage)"
+                value={name}
+                onChangeText={setName}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Amount"
+                value={amount}
+                onChangeText={setAmount}
+                keyboardType="decimal-pad"
+              />
+
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={closeModal}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.confirmButton]}
+                  onPress={addLiability}
+                >
+                  <Text style={styles.confirmButtonText}>Add</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -295,8 +311,11 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     backgroundColor: '#fff',
@@ -304,12 +323,27 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     padding: 20,
     paddingBottom: 40,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
     color: '#333',
+  },
+  closeButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  closeButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF3B30',
   },
   input: {
     borderWidth: 1,
@@ -322,17 +356,17 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: 12,
     marginTop: 20,
   },
   modalButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
   },
   cancelButton: {
     backgroundColor: '#f0f0f0',
+    marginRight: 12,
   },
   cancelButtonText: {
     fontSize: 16,
