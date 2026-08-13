@@ -8,7 +8,7 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { loadNetWorthData } from '../utils/storage';
 
 export default function HomeScreen({ navigation }) {
   const [data, setData] = useState({ assets: [], liabilities: [] });
@@ -22,10 +22,8 @@ export default function HomeScreen({ navigation }) {
 
   const loadData = async () => {
     try {
-      const jsonValue = await AsyncStorage.getItem('netWorthData');
-      if (jsonValue) {
-        setData(JSON.parse(jsonValue));
-      }
+      const data = await loadNetWorthData();
+      setData({ assets: data.assets, liabilities: data.liabilities });
     } catch (error) {
       Alert.alert('Error', 'Failed to load data');
     }

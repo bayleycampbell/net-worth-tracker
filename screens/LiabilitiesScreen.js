@@ -15,7 +15,7 @@ import {
   Keyboard,
   InputAccessoryView,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { loadNetWorthData, saveLiabilities as persistLiabilities } from '../utils/storage';
 
 const AMOUNT_INPUT_ACCESSORY = 'liabilityAmountInput';
 
@@ -31,11 +31,8 @@ export default function LiabilitiesScreen() {
 
   const loadLiabilities = async () => {
     try {
-      const jsonValue = await AsyncStorage.getItem('netWorthData');
-      if (jsonValue) {
-        const data = JSON.parse(jsonValue);
-        setLiabilities(data.liabilities);
-      }
+      const data = await loadNetWorthData();
+      setLiabilities(data.liabilities);
     } catch (error) {
       Alert.alert('Error', 'Failed to load liabilities');
     }
@@ -43,11 +40,7 @@ export default function LiabilitiesScreen() {
 
   const saveLiabilities = async (newLiabilities) => {
     try {
-      const jsonValue = await AsyncStorage.getItem('netWorthData');
-      const data = JSON.parse(jsonValue);
-      data.liabilities = newLiabilities;
-      data.lastUpdated = new Date().toISOString();
-      await AsyncStorage.setItem('netWorthData', JSON.stringify(data));
+      await persistLiabilities(newLiabilities);
     } catch (error) {
       Alert.alert('Error', 'Failed to save liabilities');
     }

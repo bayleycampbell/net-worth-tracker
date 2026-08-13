@@ -15,7 +15,7 @@ import {
   Keyboard,
   InputAccessoryView,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { loadNetWorthData, saveAssets as persistAssets } from '../utils/storage';
 
 const AMOUNT_INPUT_ACCESSORY = 'assetAmountInput';
 
@@ -31,11 +31,8 @@ export default function AssetsScreen() {
 
   const loadAssets = async () => {
     try {
-      const jsonValue = await AsyncStorage.getItem('netWorthData');
-      if (jsonValue) {
-        const data = JSON.parse(jsonValue);
-        setAssets(data.assets);
-      }
+      const data = await loadNetWorthData();
+      setAssets(data.assets);
     } catch (error) {
       Alert.alert('Error', 'Failed to load assets');
     }
@@ -43,11 +40,7 @@ export default function AssetsScreen() {
 
   const saveAssets = async (newAssets) => {
     try {
-      const jsonValue = await AsyncStorage.getItem('netWorthData');
-      const data = JSON.parse(jsonValue);
-      data.assets = newAssets;
-      data.lastUpdated = new Date().toISOString();
-      await AsyncStorage.setItem('netWorthData', JSON.stringify(data));
+      await persistAssets(newAssets);
     } catch (error) {
       Alert.alert('Error', 'Failed to save assets');
     }
